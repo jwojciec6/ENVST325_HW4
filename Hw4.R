@@ -81,3 +81,47 @@ ggplot(Jan_temps, aes(x =dateF)) +
 
 ##Prompt 2
 
+mayjune_solar <- weather %>%
+  filter(format(dateF, "%m") %in% c("05", "06") & format(dateF, "%Y") == "2021" )
+
+ggplot(mayjune_solar) +
+  aes(dateF, SolRad) +
+  geom_point() +
+  labs(title = "Solar Radiation May-June 2021",
+       x ="Date",
+       y= "Solar Radiation (W/m^2)")
+
+##looking at the graph there does not appear to be 
+## any indication of build up in the sensor readings
+## you can follow the consistent peaks and valleys 
+## of the day and night cycle some days are lower total 
+## but that can probably be attributed to cloudy days 
+## Overall the peaks and valleys are consistent throughout this time
+## period with no indication of accumulation causing lower or higher readings
+
+
+##Prompt 3
+
+##Discussed in class, There is problems with the data around 
+## daylight savings caused by the gap in time. There are issues with 
+## time zone assumptions as we saw the time changed at 5am and not 2am 
+## like normal due to the sensor being programmed to switch in a different time zone 
+## then where the sensor was located.
+
+
+##Question 1
+
+##remove below 0 temps and more than 2 degrees imbalance
+clean_percip <- weather %>%
+  filter(AirTemp >= 0) %>%
+  filter(between(XLevel, -2, 2) & between(YLevel, -2, 2))
+
+##sum number of N/A's in precipitation data
+sum(is.na(weather$Precip))
+
+##Question 2
+
+##flag for low voltage 
+##if under 8500 mV flag with a 1
+##if no low voltage flag with a 0
+weather$lowvoltage <- ifelse(weather$BatVolt < 8500, 1, 0)
