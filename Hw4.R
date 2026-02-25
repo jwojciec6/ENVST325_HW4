@@ -204,7 +204,30 @@ sum(!is.na(Marapr$Precip)) /96
 
 ##Question 6
 
+soilFiles <- list.files("/cloud/project/activity04/soil")
+#set up variable to be used in for loop
+soilList <- list()
 
+for(i in 1:length(soilFiles)) {
+  soilList[[i]] <- read.csv(paste0("/cloud/project/activity04/soil/", soilFiles[i]))
+}
+
+str(soilList)
+
+soilData <- do.call("rbind", soilList)
+
+#parse date for soil data 
+soilData$dateF <- ymd_hm(soilData$Timestamp)
+
+#time check function with extra attribute for specified interval
+timeCheck <- function(x, time_interval){
+  intervals <- x[-length(x)] %--% x[-1]
+  interval_times <- int_length(intervals)
+  intervals[interval_times != time_interval]
+}
+
+##check for hourly intervals in the data
+timeCheck(soilData$dateF, 3600)
 
 
 
