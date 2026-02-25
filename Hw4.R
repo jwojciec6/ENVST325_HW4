@@ -77,7 +77,7 @@ ggplot(Jan_temps, aes(x =dateF)) +
   geom_line(aes(y=rolling_avg), color ="blue") +
   labs(title = "January 2022 Rolling Average Air Temp",
        x = "Date", 
-       y = "Temperature degrees Celsius") 
+       y = "Temperature (°C)") 
 
 ##Prompt 2
 
@@ -125,3 +125,86 @@ sum(is.na(weather$Precip))
 ##if under 8500 mV flag with a 1
 ##if no low voltage flag with a 0
 weather$lowvoltage <- ifelse(weather$BatVolt < 8500, 1, 0)
+
+
+##Question 3
+
+##Checks ranges of data for temperature and solar radation
+check_real <- function(data, temp, solar) {
+  
+  data$temp_flag <- ifelse(data[[temp]] < -25 | data[[temp]] > 35,
+                      "Warning", "Ok")
+  
+  data$solar_flag <- ifelse(data[[solar]] < 0 | data[[solar]] > 1000,
+                      "Warning", "Ok")
+  
+  return(data)
+}
+
+#calling function to make two additional flag columns
+weather <- check_real(weather, "AirTemp", "SolRad")
+
+##Question 4
+
+##filter out N/As and only Jan-March 2021 data
+winter_temps <- weather %>%
+  filter(format(dateF, "%m") %in% c("01", "02", "03") & 
+           format(dateF, "%Y") == "2021") %>%
+  filter(!is.na(AirTemp))
+
+##plot temperature data
+ggplot(winter_temps) +
+  aes(x = dateF, y = AirTemp) +
+  geom_line(color ="cadetblue") +
+  labs(title = "Winter Air Temperatures Jan-Mar 2021",
+       x = "Date",
+       y = "Air Temperature (°C)")
+
+##Question 5
+
+Marapr <- weather %>%
+  filter(format(dateF, "%m") %in% c("03", "04") & 
+           format(dateF, "%Y") == "2021")
+
+##temperature for under 35 degrees Fahrenheit
+under_35 <- numeric(1.6)
+
+##make a date only column 
+Marapr$date_only <- as.Date(Marapr$dateF)
+
+##get unique dates
+
+unique_dates <- unique(Marapr$date_only)
+
+##calculate if first entry is above 35 degrees Fahrenheit
+first_day <- unique_dates[1]
+if(any(Marapr$AirTemp[Marapr$date_only == first_day] < under_35, na.rm = TRUE)) {
+  Marapr$Precip[Marapr$date_only == first_day] <- NA
+}
+
+##Calculate is the rest of the days are valid 
+for (i in 2:length(unique_dates)) {
+  current_day <- unique_dates[i]
+  previous_day <- unique_dates[i-1]
+  
+  current_low <- any(Marapr$AirTemp[Marapr$date_only == current_day] < under_35, na.rm = TRUE)
+  prev_low <- any(Marapr$AirTemp[Marapr$date_only == previous_day] < under_35, na.rm = TRUE)
+  
+  if(current_low | prev_low) {
+    Marapr$Precip[Marapr$date_only == current_day] <- NA
+  }
+}
+
+##sum total precipitation between this period 
+sum(Marapr$Precip, na.rm = TRUE)
+
+##sum number of valid readings and divide by 96 to get daily numbers
+sum(!is.na(Marapr$Precip)) /96
+
+
+##Question 6
+
+
+
+
+
