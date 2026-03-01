@@ -167,7 +167,7 @@ Marapr <- weather %>%
            format(dateF, "%Y") == "2021")
 
 ##temperature for under 35 degrees Fahrenheit
-under_35 <- numeric(1.6)
+under_35 <- 1.67
 
 ##make a date only column 
 Marapr$date_only <- as.Date(Marapr$dateF)
@@ -194,9 +194,6 @@ for (i in 2:length(unique_dates)) {
     Marapr$Precip[Marapr$date_only == current_day] <- NA
   }
 }
-
-##sum total precipitation between this period 
-sum(Marapr$Precip, na.rm = TRUE)
 
 ##sum number of valid readings and divide by 96 to get daily numbers
 sum(!is.na(Marapr$Precip)) /96
